@@ -8,13 +8,19 @@
 This project is a Kafka Proof of Concept (POC).
 
 ## Coding Guidelines
-- Ensure all code includes proper error handling.
+- **Error Handling**: Focus on visibility. Use Producer callbacks and Consumer error handlers. Avoid complex retry logic for the POC, but ensure errors are logged.
+- **Logging**: Use SLF4J (`Logger`) instead of `System.out`. This aids in debugging async Kafka events.
+- **Configuration**: Prefer `application.yml` for configurable values (topics, brokers) over hardcoded constants.
+- **Topic Management**: Define topics programmatically (e.g., `NewTopic` beans) rather than relying on auto-creation. This ensures reproducible configuration for advanced features like log compaction.
+- **Serialization**: Use `StringSerializer` for keys and `JsonSerializer` for values to ensure compatibility between modules.
 - Prefer modern idioms for the languages used.
 - Use Java 21 and Maven.
 - Create a multi-module project structure:
     - `common`: Shared data models (DTOs).
     - `producer`: Spring Boot Producer application.
     - `consumer`: Spring Boot Consumer application.
+- Ensure all classes and public methods have comprehensive Javadoc.
+- Update the `README.md` file as part of the code changes whenever new features, setup steps, or architectural decisions are made.
 
 ## Goals
 - I want to test out some Kafka concepts in a few stages
