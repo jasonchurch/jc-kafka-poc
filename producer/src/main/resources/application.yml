@@ -1,10 +1,10 @@
 spring:
-  main:
-    web-application-type: none # Disable Tomcat (avoids port 8080 conflict with AKHQ)
   kafka:
     bootstrap-servers: localhost:9094
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        spring.json.add.type.headers: false # Cleaner headers for this POC
+
+app:
+  topic:
+    fx-rates: fx-rates
