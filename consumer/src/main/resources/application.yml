@@ -14,4 +14,16 @@ spring:
 
 app:
   topic:
-    fx-rates: fx-rates
+    fx-rates:
+      name: fx-rates
+      partitions: 3
+      replicas: 1
+      retention-ms: 604800000 # 7 days
+      cleanup-policy: delete
+    fx-rates-compacted:
+      name: fx-rates-compacted
+      partitions: 3
+      replicas: 1
+      cleanup-policy: compact
+      min-cleanable-dirty-ratio: 0.01
+      segment-ms: 100

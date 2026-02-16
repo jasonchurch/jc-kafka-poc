@@ -29,6 +29,7 @@ public class FxRateGenerator implements CommandLineRunner {
 
     private final KafkaTemplate<String, FxRate> kafkaTemplate;
     private final String topicName;
+    private final String compactedTopicName;
     private final Random random = new Random();
     private final Map<String, BigDecimal> currentRates = new HashMap<>();
 
@@ -37,11 +38,14 @@ public class FxRateGenerator implements CommandLineRunner {
      *
      * @param kafkaTemplate the KafkaTemplate used to send messages to Kafka.
      * @param topicName     the target Kafka topic name injected from configuration.
+     * @param compactedTopicName the target Compacted Kafka topic name.
      */
     public FxRateGenerator(KafkaTemplate<String, FxRate> kafkaTemplate,
-                           @Value("${app.topic.fx-rates}") String topicName) {
+                           @Value("${app.topic.fx-rates.name}") String topicName,
+                           @Value("${app.topic.fx-rates-compacted.name}") String compactedTopicName) {
         this.kafkaTemplate = kafkaTemplate;
         this.topicName = topicName;
+        this.compactedTopicName = compactedTopicName;
         // Initialize starting rates
         currentRates.put("USD_CAD", new BigDecimal("1.3500"));
         currentRates.put("EUR_CAD", new BigDecimal("1.4500"));
@@ -60,7 +64,7 @@ public class FxRateGenerator implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
-        log.info("Starting FX Rate Generator targeting topic: {}", topicName);
+        log.info("Starting FX Rate Generator targeting topics: {} and {}", topicName, compactedTopicName);
         
         while (true) {
             for (Map.Entry<String, BigDecimal> entry : currentRates.entrySet()) {
@@ -84,13 +88,16 @@ public class FxRateGenerator implements CommandLineRunner {
                     Instant.now()
                 );
 
-                // Send to Kafka
+                // Send to Standard Topic
                 // Key = pair (Critical for Log Compaction)
                 kafkaTemplate.send(topicName, pair, fxRate)
                     .whenComplete((result, ex) -> {
                         if (ex != null) log.error("Error sending {}: {}", pair, ex.getMessage(), ex);
                         else log.info("Sent: {}", fxRate);
                     });
+
+                // Send to Compacted Topic (Fire and forget for the POC logs to stay clean, or log on error)
+                kafkaTemplate.send(compactedTopicName, pair, fxRate);
             }
             Thread.sleep(1000); // Wait 1 second before next tick
         }

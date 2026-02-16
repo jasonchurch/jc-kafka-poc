@@ -1,14 +1,16 @@
 package com.jc.kafka.consumer;
 
 import com.jc.kafka.common.FxRate;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 /**
- * Component that consumes FX Rate messages from Kafka.
+ * Consumer component that listens for FX Rate updates.
  */
 @Component
 public class FxRateConsumer {
@@ -16,20 +18,28 @@ public class FxRateConsumer {
     private static final Logger log = LoggerFactory.getLogger(FxRateConsumer.class);
 
     /**
-     * Listens to the FX Rates topic and logs the received messages.
+     * Listens to the standard FX Rates topic (Delete policy).
+     *
+     * @param rate the deserialized FxRate object
+     * @param key  the Kafka record key (e.g., "USD_CAD")
+     */
+    @KafkaListener(topics = "${app.topic.fx-rates.name}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeStandard(@Payload FxRate rate, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
+        log.info("Received [Standard]: Key={}, Rate={}", key, rate);
+    }
+
+    /**
+     * Listens to the Compacted FX Rates topic.
      * <p>
-     * The topic name and group ID are resolved from the application configuration.
+     * We use a distinct groupId suffix ("-compacted") to ensure this listener maintains
+     * its own offset management independent of the standard listener.
      * </p>
      *
-     * @param record the incoming Kafka record containing the FX Rate.
+     * @param rate the deserialized FxRate object
+     * @param key  the Kafka record key
      */
-    @KafkaListener(topics = "${app.topic.fx-rates}", groupId = "${spring.kafka.consumer.group-id}")
-    public void consume(ConsumerRecord<String, FxRate> record) {
-        log.info("Received: Key={}, Value={}, Partition={}, Offset={}, Timestamp={}",
-                record.key(),
-                record.value(),
-                record.partition(),
-                record.offset(),
-                record.timestamp());
+    @KafkaListener(topics = "${app.topic.fx-rates-compacted.name}", groupId = "${spring.kafka.consumer.group-id}-compacted")
+    public void consumeCompacted(@Payload FxRate rate, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
+        log.info("Received [Compacted]: Key={}, Rate={}", key, rate);
     }
 }

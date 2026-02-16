@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * The entry point for the Kafka Consumer application.
  * <p>
- * This application listens to the configured Kafka topics and processes incoming messages.
+ * This application starts up and listens for messages on the configured Kafka topics.
  * </p>
  */
 @SpringBootApplication
