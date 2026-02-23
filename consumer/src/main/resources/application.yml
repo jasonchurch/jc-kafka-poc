@@ -11,6 +11,13 @@ spring:
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "com.jc.kafka.common"
         spring.json.value.default.type: "com.jc.kafka.common.FxRate"
+    streams:
+      application-id: fx-rate-streams-app
+      properties:
+        spring.json.trusted.packages: "com.jc.kafka.common"
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.springframework.kafka.support.serializer.JsonSerde
+        cache.max.bytes.buffering: 0
 
 app:
   topic:
@@ -27,3 +34,5 @@ app:
       cleanup-policy: compact
       min-cleanable-dirty-ratio: 0.01
       segment-ms: 100
+    fx-rates-statestore:
+      name: fx-rates-statestore

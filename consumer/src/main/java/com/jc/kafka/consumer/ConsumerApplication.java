@@ -2,6 +2,7 @@ package com.jc.kafka.consumer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.kafka.annotation.EnableKafkaStreams;
 
 /**
  * The entry point for the Kafka Consumer application.
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * </p>
  */
 @SpringBootApplication
+@EnableKafkaStreams
 public class ConsumerApplication {
 
     /**

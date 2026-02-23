@@ -66,4 +66,23 @@ public class ProducerConfig {
                 .config(TopicConfig.SEGMENT_MS_CONFIG, segmentMs)
                 .build();
     }
+
+    /**
+     * Defines the FX Rates State Store topic.
+     * <p>
+     * This topic is used for the Kafka Streams KTable experiment.
+     * </p>
+     */
+    @Bean
+    public NewTopic fxRatesStateStoreTopic(
+            @Value("${app.topic.fx-rates-statestore.name}") String topicName,
+            @Value("${app.topic.fx-rates-statestore.partitions}") int partitions,
+            @Value("${app.topic.fx-rates-statestore.replicas}") int replicas,
+            @Value("${app.topic.fx-rates-statestore.cleanup-policy}") String cleanupPolicy) {
+        return TopicBuilder.name(topicName)
+                .partitions(partitions)
+                .replicas(replicas)
+                .config(TopicConfig.CLEANUP_POLICY_CONFIG, cleanupPolicy)
+                .build();
+    }
 }

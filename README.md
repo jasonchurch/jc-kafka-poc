@@ -67,5 +67,5 @@ Sent: FxRate[pair=USD_CAD, rate=1.3505, inverseRate=0.7405, timestamp=...]
 - [x] Define standard FX Rate DTO and Topic naming.
 - [x] Create Producer to generate random market data.
 - [ ] **Create Consumer**: Implement a Spring Boot consumer to listen for FX rates.
-- [ ] **Log Compaction**: Configure the topic for compaction and verify consumer catch-up behavior on restart.
+- [x] **Log Compaction**: Configure the topic for compaction and verify consumer catch-up behavior on restart.
 - [ ] **State Store**: Explore Kafka Streams or state store concepts for aggregating data.

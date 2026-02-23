@@ -30,6 +30,7 @@ public class FxRateGenerator implements CommandLineRunner {
     private final KafkaTemplate<String, FxRate> kafkaTemplate;
     private final String topicName;
     private final String compactedTopicName;
+    private final String stateStoreTopicName;
     private final Random random = new Random();
     private final Map<String, BigDecimal> currentRates = new HashMap<>();
 
@@ -39,13 +40,16 @@ public class FxRateGenerator implements CommandLineRunner {
      * @param kafkaTemplate the KafkaTemplate used to send messages to Kafka.
      * @param topicName     the target Kafka topic name injected from configuration.
      * @param compactedTopicName the target Compacted Kafka topic name.
+     * @param stateStoreTopicName the target State Store Kafka topic name.
      */
     public FxRateGenerator(KafkaTemplate<String, FxRate> kafkaTemplate,
                            @Value("${app.topic.fx-rates.name}") String topicName,
-                           @Value("${app.topic.fx-rates-compacted.name}") String compactedTopicName) {
+                           @Value("${app.topic.fx-rates-compacted.name}") String compactedTopicName,
+                           @Value("${app.topic.fx-rates-statestore.name}") String stateStoreTopicName) {
         this.kafkaTemplate = kafkaTemplate;
         this.topicName = topicName;
         this.compactedTopicName = compactedTopicName;
+        this.stateStoreTopicName = stateStoreTopicName;
         // Initialize starting rates
         currentRates.put("USD_CAD", new BigDecimal("1.3500"));
         currentRates.put("EUR_CAD", new BigDecimal("1.4500"));
@@ -64,7 +68,7 @@ public class FxRateGenerator implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
-        log.info("Starting FX Rate Generator targeting topics: {} and {}", topicName, compactedTopicName);
+        log.info("Starting FX Rate Generator targeting topics: {}, {}, {}", topicName, compactedTopicName, stateStoreTopicName);
         
         while (true) {
             for (Map.Entry<String, BigDecimal> entry : currentRates.entrySet()) {
@@ -98,8 +102,11 @@ public class FxRateGenerator implements CommandLineRunner {
 
                 // Send to Compacted Topic (Fire and forget for the POC logs to stay clean, or log on error)
                 kafkaTemplate.send(compactedTopicName, pair, fxRate);
+
+                // Send to State Store Topic
+                kafkaTemplate.send(stateStoreTopicName, pair, fxRate);
             }
-            Thread.sleep(1000); // Wait 1 second before next tick
+            Thread.sleep(10000); // Wait 10 seconds before next tick
         }
     }
 }
